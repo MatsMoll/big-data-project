@@ -1,5 +1,6 @@
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 import java.util.Base64
 
 case class ProjectFileConfig(postsUri: String, commentsUri: String, usersUri: String, badgesUri: String)
@@ -91,7 +92,41 @@ object SimpleApp {
     println("badges")
     println(badgesLessThan3)
 
+    // 2.5
+    val upvotesMean = users.map(u => u.upVotes).mean()
+    val downvotesMean = users.map(u => u.downVotes).mean()
 
+    println(s"upvotemean: $upvotesMean, downvotemean: $downvotesMean")
+
+    val pearsonsTable = users.map(u => {
+      val up = (u.upVotes - upvotesMean)
+      val left = up * up
+      val down = (u.downVotes - downvotesMean)
+      val right = down * down
+      val numerator = up * down
+
+      (numerator, left, right)
+    }).collect()
+
+    pearsonsTable.take(20).foreach(println)
+
+    val numeratorSum = pearsonsTable
+      .map{case (numerator, _, _) => numerator}
+      .sum
+    println(s"numSum: ${numeratorSum.toString}")
+
+    val left = pearsonsTable
+      .map{case (_, left, _) => left}
+      .sum
+    println(s"left: ${left.toString}")
+
+    val right = pearsonsTable
+      .map{case (_, _, right) => right}
+      .sum
+    println(s"right: ${right.toString}")
+
+    val res = (numeratorSum) / (math.sqrt(math.abs(left)) * (math.sqrt(math.abs(right))))
+    println(s"correlation: ${res.toString}")
     // println(postsRdd.count())
     // println(commentsRdd.count())
     // println(useresRdd.count())
