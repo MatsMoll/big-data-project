@@ -35,35 +35,12 @@ object SimpleApp {
     val posts = postsRdd.map(row => Post.fromRow(row))
     val users = useresRdd.map(row => User.fromRow(row))
 
-    val usersMap = users.map(user => (user.id, user)).collect().toMap
-
-    val oldestPost = posts.reduce((oldestPost, post) => {
-      (post.creationDate, oldestPost.creationDate) match {
-        case (Some(potenital), Some(oldestDate)) => 
-          if (potenital.isBefore(oldestDate)) post else oldestPost
-        case (Some(_), None) => post
-        case _ => oldestPost
-      }
-    })
-    val newestPost = posts.reduce((newestPost, post) => {
-      (post.creationDate, newestPost.creationDate) match {
-        case (Some(potenital), Some(newestDate)) => 
-          if (newestDate.isBefore(potenital)) newestPost else post
-        case (Some(_), None) => post
-        case _ => newestPost
-      }
-    })
-    println(newestPost)
-    println(oldestPost)
-    println(newestPost.ownerUserId.map(userID => usersMap(userID)))
-    println(oldestPost.ownerUserId.map(userID => usersMap(userID)))
-
 
     // 2.1
     Task.RDDRowCounts(postsRdd, commentsRdd, useresRdd, badgesRdd)
 
     // 2.2
-
+    //Task.OldestAndNewestQuestions(posts, users)
 
     // 2.3
     Task.UserIdOfMostAnswers(posts)

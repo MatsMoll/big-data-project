@@ -36,12 +36,12 @@ object Task {
   // Task 1.5
   def RDDRowCounts(postsRdd: RDD[Array[String]],
                    commentsRdd: RDD[Array[String]],
-                   useresRdd: RDD[Array[String]],
+                   usersRdd: RDD[Array[String]],
                    badgesRdd: RDD[Array[String]]): Unit = {
-    println(postsRdd.count())
-    println(commentsRdd.count())
-    println(useresRdd.count())
-    println(badgesRdd.count())
+    println(s"Posts Rows: ${postsRdd.count()}")
+    println(s"Comments Rows: ${commentsRdd.count()}")
+    println(s"Users Rows: ${usersRdd.count()}")
+    println(s"Badges Rows: ${badgesRdd.count()}")
   }
 
   // Task 2.1
@@ -56,6 +56,32 @@ object Task {
     println("Post", averagePostCharLength)
     println("Question", averageQuestionCharLength)
     println("Comment", averageCommentCharLength)
+  }
+
+  // Task 2.2
+  def OldestAndNewestQuestions(posts: RDD[Post], users: RDD[User]): Unit = {
+    val usersMap = users.map(user => (user.id, user)).collect().toMap
+
+    val oldestPost = posts.reduce((oldestPost, post) => {
+      (post.creationDate, oldestPost.creationDate) match {
+        case (Some(potenital), Some(oldestDate)) =>
+          if (potenital.isBefore(oldestDate)) post else oldestPost
+        case (Some(_), None) => post
+        case _ => oldestPost
+      }
+    })
+    val newestPost = posts.reduce((newestPost, post) => {
+      (post.creationDate, newestPost.creationDate) match {
+        case (Some(potenital), Some(newestDate)) =>
+          if (newestDate.isBefore(potenital)) newestPost else post
+        case (Some(_), None) => post
+        case _ => newestPost
+      }
+    })
+    println(newestPost)
+    println(oldestPost)
+    println(newestPost.ownerUserId.map(userID => usersMap(userID)))
+    println(oldestPost.ownerUserId.map(userID => usersMap(userID)))
   }
 
   // Task 2.3
