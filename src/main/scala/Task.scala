@@ -38,10 +38,12 @@ object Task {
                    commentsRdd: RDD[Array[String]],
                    usersRdd: RDD[Array[String]],
                    badgesRdd: RDD[Array[String]]): Unit = {
+    println("=== TASKS 1.1 through 1.4 START ===\n")
     println(s"Posts Rows: ${postsRdd.count()}")
     println(s"Comments Rows: ${commentsRdd.count()}")
     println(s"Users Rows: ${usersRdd.count()}")
     println(s"Badges Rows: ${badgesRdd.count()}")
+    println("\n=== TASKS 1.1 through 1.4 START ===\n")
   }
 
   // Task 2.1
@@ -85,9 +87,9 @@ object Task {
   }
 
   // Task 2.3
-  def UserIdOfMostAnswers(posts: RDD[Post]): Unit = {
+  def UserIdOfMostQuestionsAndAnswersRespectively(posts: RDD[Post]): Unit = {
     println("=== TASK 2.3 ===")
-    val postss = posts
+    /*val postss = posts
       .filter(p => p.postTypeId == 1 || p.postTypeId == 2)
       .filter(p => p.ownerUserId.isDefined)
       .filter(p => p.ownerUserId.get != -1)
@@ -96,27 +98,27 @@ object Task {
       .sortBy(_._2, false)
       .take(5)
       .map{case (id, count) => println(s"(UserId:$id, count: $count)")}
-    println("=== USERS WITH MOST QUESTIONS AND ANSWERS COLLECTIVELY ===\n")
+    println("=== USERS WITH MOST QUESTIONS AND ANSWERS COLLECTIVELY ===\n")*/
 
-    val posta = posts
+    val MostQuestions = posts
       .filter(p => p.postTypeId == 1)
       .filter(p => p.ownerUserId.isDefined)
       .filter(p => p.ownerUserId.get != -1)
       .map(p => (p.ownerUserId.get, 1))
       .reduceByKey(_ + _)
       .sortBy(_._2, false)
-      .take(5)
+      .take(1)
       .map{case (id, count) => println(s"(UserId:$id, count: $count)")}
     println("===MOST QUESTION ONLY==\n")
 
-    val postas = posts
+    val MostAnswers = posts
       .filter(p => p.postTypeId == 2)
       .filter(p => p.ownerUserId.isDefined)
       .filter(p => p.ownerUserId.get != -1)
       .map(p => (p.ownerUserId.get, 1))
       .reduceByKey(_ + _)
       .sortBy(_._2, false)
-      .take(5)
+      .take(1)
       .map{case (id, count) => println(s"(UserId:$id, count: $count)")}
     println("===MOST ANSWERS ONLY==\n")
   }
@@ -165,7 +167,9 @@ object Task {
       .sum
     //println(s"right: ${right.toString}")
 
-    val res = (numeratorSum) / (math.sqrt(math.abs(left)) * (math.sqrt(math.abs(right))))
+    val res =
+      (numeratorSum) /
+      (math.sqrt(math.abs(left)) * math.sqrt(math.abs(right)))
     println(s"Task 2.5: r-coefficient: ${res.toString}\n")
 
     res

@@ -45,7 +45,7 @@ object SimpleApp {
     //Task.OldestAndNewestQuestions(posts, users)
 
     // 2.3
-    Task.UserIdOfMostAnswers(posts)
+    Task.UserIdOfMostQuestionsAndAnswersRespectively(posts)
     // 2.4
     Task.CountOfUsersWithLessThanThreeBadges(badges)
     // 2.5
