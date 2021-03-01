@@ -1,6 +1,8 @@
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
+
 import java.util.Base64
 
 case class ProjectFileConfig(postsUri: String, commentsUri: String, usersUri: String, badgesUri: String)
@@ -32,6 +34,8 @@ object Computations {
 
 object SimpleApp {
   def main(args: Array[String]) {
+    Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
+
     val spark = SparkSession.builder()
       .appName("Big Data Project")
       .master("local[1]")
@@ -80,6 +84,41 @@ object SimpleApp {
     println("Post", averagePostCharLength)
     println("Question", averageQuestionCharLength)
     println("Comment", averageCommentCharLength)
+
+    // 2.3
+    println("=== TASK 2.3 ===")
+    val postss = posts
+      .filter(p => p.postTypeId == 1 || p.postTypeId == 2)
+      .filter(p => p.ownerUserId.isDefined)
+      .filter(p => p.ownerUserId.get != -1)
+      .map(p => (p.ownerUserId.get, 1))
+      .reduceByKey(_ + _)
+      .sortBy(_._2, false)
+      .take(5)
+      .foreach(println)
+    println("=== USERS WITH MOST QUESTIONS AND ANSWERS COLLECTIVELY ===")
+
+    val posta = posts
+      .filter(p => p.postTypeId == 1)
+      .filter(p => p.ownerUserId.isDefined)
+      .filter(p => p.ownerUserId.get != -1)
+      .map(p => (p.ownerUserId.get, 1))
+      .reduceByKey(_ + _)
+      .sortBy(_._2, false)
+      .take(5)
+      .foreach(println)
+    println("===MOST QUESTION ONLY==")
+
+    val postas = posts
+      .filter(p => p.postTypeId == 2)
+      .filter(p => p.ownerUserId.isDefined)
+      .filter(p => p.ownerUserId.get != -1)
+      .map(p => (p.ownerUserId.get, 1))
+      .reduceByKey(_ + _)
+      .sortBy(_._2, false)
+      .take(5)
+      .foreach(println)
+    println("===MOST ANSWERS ONLY==")
 
     val badgesRdd = spark.sparkContext.textFile(config.badgesUri).filter(x => !x.startsWith("\"UserId\"")).map(x => x.split("\t"))
     val badges = badgesRdd.map(row => Badge.fromRow(row))
