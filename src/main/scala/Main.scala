@@ -25,6 +25,8 @@ object Computations {
     
     charLength._1.doubleValue() / charLength._2.doubleValue()
   }
+
+
 }
 
 object SimpleApp {
@@ -80,8 +82,14 @@ object SimpleApp {
 
     val badgesRdd = spark.sparkContext.textFile(config.badgesUri).filter(x => !x.startsWith("\"UserId\"")).map(x => x.split("\t"))
     val badges = badgesRdd.map(row => Badge.fromRow(row))
-    badges.map(badge => (badge.userId, badge.name)).take(20).foreach(println)
-    println("shit")
+
+    // 2.4
+    val badgesLessThan3 = badges.map(badge => (badge.userId, 1))
+      .reduceByKey(_ + _)
+      .filter{ case (_, badgeCount) => badgeCount < 3}
+      .count();
+    println("badges")
+    println(badgesLessThan3)
 
 
     // println(postsRdd.count())
