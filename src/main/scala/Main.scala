@@ -5,7 +5,10 @@ import org.apache.spark.sql.functions._
 
 import java.util.Base64
 
-case class ProjectFileConfig(postsUri: String, commentsUri: String, usersUri: String, badgesUri: String)
+case class ProjectFileConfig(postsUri: String,
+                             commentsUri: String,
+                             usersUri: String,
+                             badgesUri: String)
 
 
 object SimpleApp {
@@ -34,7 +37,6 @@ object SimpleApp {
     val badges = badgesRdd.map(row => Badge.fromRow(row))
     val posts = postsRdd.map(row => Post.fromRow(row))
     val users = useresRdd.map(row => User.fromRow(row))
-
 
     // 2.1
     Task.RDDRowCounts(postsRdd, commentsRdd, useresRdd, badgesRdd)
