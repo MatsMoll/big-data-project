@@ -1,7 +1,5 @@
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-
-import java.time.format.DateTimeFormatter
 import java.util.Base64
 
 case class ProjectFileConfig(postsUri: String, commentsUri: String, usersUri: String, badgesUri: String)
@@ -29,10 +27,6 @@ object Computations {
   }
 }
 
-object MyUtils {
-  val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-}
-
 object SimpleApp {
   def main(args: Array[String]) {
     val spark = SparkSession.builder()
@@ -54,7 +48,6 @@ object SimpleApp {
 
     val users = useresRdd.map(row => User.fromRow(row))
     val usersMap = users.map(user => (user.id, user)).collect().toMap
-    // val badgesRdd = spark.read.options(Map("delimiter"->"\t", "header"->"true")).csv(config.badgesUri).rdd
 
     val averagePostCharLength = Computations.averageCharLengthBase64(postsRdd.map(x => x(5)))
     val averageCommentCharLength = Computations.averageCharLengthBase64(commentsRdd.map(x => x(2)))
@@ -84,7 +77,13 @@ object SimpleApp {
     println("Post", averagePostCharLength)
     println("Question", averageQuestionCharLength)
     println("Comment", averageCommentCharLength)
-    
+
+    val badgesRdd = spark.sparkContext.textFile(config.badgesUri).filter(x => !x.startsWith("\"UserId\"")).map(x => x.split("\t"))
+    val badges = badgesRdd.map(row => Badge.fromRow(row))
+    badges.map(badge => (badge.userId, badge.name)).take(20).foreach(println)
+    println("shit")
+
+
     // println(postsRdd.count())
     // println(commentsRdd.count())
     // println(useresRdd.count())
