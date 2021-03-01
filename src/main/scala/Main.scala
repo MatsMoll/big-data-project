@@ -1,79 +1,10 @@
-import org.apache.spark.sql.SparkSession
-import java.io.File
-import java.util.Base64
-import java.nio.charset.StandardCharsets
 import org.apache.spark.rdd.RDD
-import java.time.LocalDateTime
+import org.apache.spark.sql.SparkSession
+
 import java.time.format.DateTimeFormatter
+import java.util.Base64
 
 case class ProjectFileConfig(postsUri: String, commentsUri: String, usersUri: String, badgesUri: String)
-case class Post(
-  id: Int, 
-  postTypeId: Int, 
-  creationDate: Option[LocalDateTime], 
-  score: Int,
-  viewCount: Int, 
-  body: String, 
-  ownerUserId: Option[Int], 
-  lastActivityDate: LocalDateTime, 
-  title: String, 
-  tags: Array[String], 
-  answerCount: Int, 
-  commentCount: Int, 
-  favoriteCount: Int, 
-  closeDate: Option[LocalDateTime]
-)
-
-object Post {
-  def fromRow(row: Array[String]): Post = {
-    Post(
-      row(0).toInt,
-      row(1).toInt,
-      if (row(2) == "NULL") None else Some(LocalDateTime.parse(row(2), MyUtils.dateFormatter)),
-      row(3).toInt,
-      row(4).toInt,
-      new String(Base64.getDecoder().decode(row(5))),
-      if (row(6) == "NULL") None else Some(row(6).toInt),
-      LocalDateTime.parse(row(7), MyUtils.dateFormatter),
-      row(8),
-      row(9).split("><").map(x => x.replace("<", "").replace(">", "")),
-      row(10).toInt,
-      row(11).toInt,
-      row(12).toInt,
-      if (row(13) == "NULL") None else Some(LocalDateTime.parse(row(13), MyUtils.dateFormatter))
-    )
-  }
-}
-
-case class User(
-  id: Int,
-  reprutation: String,
-  createdAt: Option[LocalDateTime],
-  displayName: String,
-  lastAccessDate: Option[LocalDateTime],
-  aboutMe: Option[String],
-  views: Option[Int],
-  upVotes: Int,
-  downVotes: Int
-)
-
-object User {
-  def fromRow(row: Array[String]): User = {
-    User(
-      row(0).toInt,
-      row(1),
-      if (row(2) == "NULL") None else Some(LocalDateTime.parse(row(2), MyUtils.dateFormatter)),
-      row(3),
-      if (row(4) == "\"") None else Some(LocalDateTime.parse(row(4), MyUtils.dateFormatter)),
-      if (row(5) == "NULL") None else Some(row(5)),
-      if (row(6) == "NULL") None else Some(row(6).toInt),
-      row(7).toInt,
-      row(8).toInt
-    )
-  }
-}
-
-
 object Computations {
   def averageCharLengthBase64(base64rdd: RDD[String]): Double = {
     val strings = base64rdd.map(baseString => { 
