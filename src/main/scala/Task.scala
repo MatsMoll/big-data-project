@@ -1,10 +1,12 @@
 import java.util.Base64
 
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.graphx._
 import org.apache.spark.SparkContext
 import scala.math.log10
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.functions._
+import org.apache.parquet.filter2.predicate.Operators.Column
 
 object Computations {
   def averageCharLengthBase64(base64rdd: RDD[String]): Double = {
@@ -197,11 +199,15 @@ object Task {
   }
 
 
+  // Task 3.1
   def userCommentGraph(comments: RDD[Comment], posts: RDD[Post], sparkContext: SparkContext): Graph[Int, Long] = {
     val postOwner = posts.flatMap(post => post.ownerUserId.map(ownerId => (post.id, ownerId))).collect().toMap
-    val userComments = comments.groupBy(comment => comment.userId).cache()
+
+    // Filtering on userId > 1 as some posts has
+    val validUserComments = comments.filter(comment => comment.userId >= 1)
+    val userComments = validUserComments.groupBy(comment => comment.userId).cache()
     
-    val rawEdges = comments.flatMap(comment => postOwner.get(comment.postId)
+    val rawEdges = validUserComments.flatMap(comment => postOwner.get(comment.postId)
         .map(ownerId =>  (comment.userId, ownerId) ) )
         .countByValue()
 
@@ -209,5 +215,23 @@ object Task {
 
     val nodes: RDD[(VertexId, Int)] = userComments.map(user => (user._1, user._1))
     Graph(nodes, edges, -1)
+  }
+
+  def dataframeFromGraph(graph: Graph[Int, Long], spark: SparkSession): DataFrame = 
+    spark.createDataFrame(graph.triplets.map(trip => (trip.srcId, trip.attr, trip.dstId)))
+      .toDF(SQLStrings.commentUserID, SQLStrings.numberOfComments, SQLStrings.postUserID)
+
+  // Task 3.2
+  def userIDsWithMostComments(dataframe: DataFrame, amount: Int = 10): Dataset[Row] = {
+
+    println("=== Task 3.2 ===")
+    
+    val mostComments = dataframe.groupBy(col(SQLStrings.commentUserID))
+      .agg(sum(SQLStrings.numberOfComments).as(SQLStrings.numberOfCommentsSum))
+      .sort(col(SQLStrings.numberOfCommentsSum).desc)
+      .limit(10)
+
+    mostComments.show()
+    mostComments
   }
 }

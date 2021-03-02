@@ -26,6 +26,7 @@ object SimpleApp {
       "data/users.csv",
       "data/badges.csv"
     )
+    
 
     // TASK [1.1, 1.2, 1.3, 1.4]
     val badgesRdd = Setup.LoadBadgesRDD(spark, config)
@@ -56,7 +57,12 @@ object SimpleApp {
     Task.userEntropy(comments)
 
     // 3.1
-    Task.userCommentGraph(comments, posts, sc).vertices.take(10).foreach(println)
+    val graph = Task.userCommentGraph(comments, posts, sc)
+
+    // 3.2
+    Task.usersWithMostComments(graph, spark)
+      
+      
     
     // println(postsRdd.count())
     // println(commentsRdd.count())
