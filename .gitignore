@@ -49,3 +49,5 @@ website/i18n/*
 
 project/metals.sbt
 coursier
+
+data/comments-posts.csv/*
