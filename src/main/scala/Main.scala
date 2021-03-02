@@ -13,12 +13,12 @@ case class ProjectFileConfig(postsUri: String,
 
 object SimpleApp {
   def main(args: Array[String]) {
-    Logger.getLogger("org.apache.spark").setLevel(Level.FATAL)
-
     val spark = SparkSession.builder()
       .appName("Big Data Project")
       .master("local[1]")
       .getOrCreate()
+    val sc = spark.sparkContext
+    sc.setLogLevel("WARN")
 
     val config = ProjectFileConfig(
       "data/posts.csv",
