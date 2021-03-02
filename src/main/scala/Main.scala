@@ -1,6 +1,8 @@
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import java.util.Base64
+import scala.math.log10
+import org.apache.spark.graphx._
 
 case class ProjectFileConfig(postsUri: String, commentsUri: String, usersUri: String, badgesUri: String)
 object Computations {
@@ -92,6 +94,19 @@ object SimpleApp {
     println(badgesLessThan3)
 
 
+    // 2.6
+    val comments = commentsRdd.map(row => Comment.fromRow(row))
+    val numberOfComments = comments.count()
+    val userComments = comments.groupBy(comment => comment.userId)
+
+    val usersEntropy = userComments
+      .map({case (_, postIDs: Iterable[Comment]) =>
+        postIDs.count(_ => true).toDouble / numberOfComments.toDouble
+      })
+      .reduce({case (sum, value) => sum - value * log10(value) / log10(2)})
+
+    println(usersEntropy)
+    
     // println(postsRdd.count())
     // println(commentsRdd.count())
     // println(useresRdd.count())
