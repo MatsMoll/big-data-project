@@ -61,11 +61,16 @@ object SimpleApp {
 
     // 3.2
     val dataframe = Task.dataframeFromGraph(graph, spark)
+
+    // 3.3
     Task.userIDsWithMostComments(dataframe)
     
-    // 3.3
+    // 3.4
     Task.usersWithMostCommentsOnTheirPost(dataframe, users, spark)
     
+    // 3.5
+    dataframe.write.csv("data/comments-posts.csv")
+
     spark.stop()
   }
 }
