@@ -39,7 +39,7 @@ object Task {
   // 1.1 - 1.4 in Setup.scala
 
   // Task 1.5
-  def RDDRowCounts(postsRdd: RDD[Array[String]],
+  def countRDDRows(postsRdd: RDD[Array[String]],
                    commentsRdd: RDD[Array[String]],
                    usersRdd: RDD[Array[String]],
                    badgesRdd: RDD[Array[String]]): Unit = {
@@ -52,7 +52,7 @@ object Task {
   }
 
   // Task 2.1
-  def AverageCharacterLengthInTexts(postsRdd: RDD[Array[String]],
+  def averageCharacterLengthInTexts(postsRdd: RDD[Array[String]],
                                     commentsRdd: RDD[Array[String]],
                                     useresRdd: RDD[Array[String]]): Unit = {
     val averagePostCharLength = Computations.averageCharLengthBase64(postsRdd.map(x => x(5)))
@@ -66,7 +66,7 @@ object Task {
   }
 
   // Task 2.2
-  def OldestAndNewestQuestions(posts: RDD[Post], users: RDD[User]): Unit = {
+  def oldestAndNewestQuestions(posts: RDD[Post], users: RDD[User]): Unit = {
     val usersMap = users.map(user => (user.id, user)).collect().toMap
 
     val oldestPost = posts.reduce((oldestPost, post) => {
@@ -92,20 +92,9 @@ object Task {
   }
 
   // Task 2.3
-  def UserIdOfMostQuestionsAndAnswersRespectively(posts: RDD[Post]): Unit = {
+  def userIdOfMostQuestionsAndAnswersRespectively(posts: RDD[Post]): Unit = {
     println("=== TASK 2.3 ===")
-    /*val postss = posts
-      .filter(p => p.postTypeId == 1 || p.postTypeId == 2)
-      .filter(p => p.ownerUserId.isDefined)
-      .filter(p => p.ownerUserId.get != -1)
-      .map(p => (p.ownerUserId.get, 1))
-      .reduceByKey(_ + _)
-      .sortBy(_._2, false)
-      .take(5)
-      .map{case (id, count) => println(s"(UserId:$id, count: $count)")}
-    println("=== USERS WITH MOST QUESTIONS AND ANSWERS COLLECTIVELY ===\n")*/
-
-    val MostQuestions = posts
+    val mostQuestions = posts
       .filter(p => p.postTypeId == 1)
       .filter(p => p.ownerUserId.isDefined)
       .filter(p => p.ownerUserId.get != -1)
@@ -113,10 +102,10 @@ object Task {
       .reduceByKey(_ + _)
       .sortBy(_._2, false)
       .take(1)
-      .map{case (id, count) => println(s"(UserId:$id, count: $count)")}
+      .map { case (id, count) => println(s"(UserId:$id, count: $count)") }
     println("===MOST QUESTION ONLY==\n")
 
-    val MostAnswers = posts
+    val mostAnswers = posts
       .filter(p => p.postTypeId == 2)
       .filter(p => p.ownerUserId.isDefined)
       .filter(p => p.ownerUserId.get != -1)
@@ -124,7 +113,7 @@ object Task {
       .reduceByKey(_ + _)
       .sortBy(_._2, false)
       .take(1)
-      .map{case (id, count) => println(s"(UserId:$id, count: $count)")}
+      .map { case (id, count) => println(s"(UserId:$id, count: $count)") }
     println("===MOST ANSWERS ONLY==\n")
   }
 
@@ -132,10 +121,11 @@ object Task {
   def CountOfUsersWithLessThanThreeBadges(badges: RDD[Badge]): Long = {
     val badgesLessThan3 = badges.map(badge => (badge.userId, 1))
       .reduceByKey(_ + _)
-      .filter{ case (_, badgeCount) => badgeCount < 3}
+      .filter { case (_, badgeCount) => badgeCount < 3 }
       .count()
 
-    println(s"Task 2.4: Users with less than three badges: $badgesLessThan3\n")
+    println(s"=== Task 2.4: Users with less than three " +
+      s"badges: $badgesLessThan3\n ===")
 
     badgesLessThan3
   }
@@ -158,17 +148,17 @@ object Task {
     }).collect()
 
     val numeratorSum = pearsonsTable
-      .map{case (numerator, _, _) => numerator}
+      .map { case (numerator, _, _) => numerator }
       .sum
     //println(s"numSum: ${numeratorSum.toString}")
 
     val left = pearsonsTable
-      .map{case (_, left, _) => left}
+      .map { case (_, left, _) => left }
       .sum
     //println(s"left: ${left.toString}")
 
     val right = pearsonsTable
-      .map{case (_, _, right) => right}
+      .map { case (_, _, right) => right }
       .sum
     //println(s"right: ${right.toString}")
     val denominator = left * right;
@@ -176,8 +166,8 @@ object Task {
 
     val res =
       (numeratorSum) /
-      (math.sqrt(denominator))
-    println(s"Task 2.5: r-coefficient: ${res.toString}\n")
+        (math.sqrt(denominator))
+    println(s"=== Task 2.5: r-coefficient: ${res.toString}\n ===")
 
     res
   }
@@ -188,12 +178,12 @@ object Task {
     val userComments = comments.groupBy(comment => comment.userId).cache()
 
     val usersEntropy = userComments
-      .map({case (_, postIDs: Iterable[Comment]) =>
+      .map({ case (_, postIDs: Iterable[Comment]) =>
         postIDs.count(_ => true).toDouble / numberOfComments.toDouble
       })
-      .reduce({case (sum, value) => sum - value * log10(value) / log10(2)})
+      .reduce({ case (sum, value) => sum - value * log10(value) / log10(2) })
 
-    println(s"Task 2.6: users comment entropy: ${usersEntropy}\n")
+    println(s"=== Task 2.6: users comment entropy: ${usersEntropy}\n ===")
 
     usersEntropy
   }
@@ -206,18 +196,18 @@ object Task {
     // Filtering on userId > 1 as some posts has
     val validUserComments = comments.filter(comment => comment.userId >= 1)
     val userComments = validUserComments.groupBy(comment => comment.userId).cache()
-    
-    val rawEdges = validUserComments.flatMap(comment => postOwner.get(comment.postId)
-        .map(ownerId =>  (comment.userId, ownerId) ) )
-        .countByValue()
 
-    val edges = sparkContext.parallelize(rawEdges.map({case (userIDs, count) => Edge(userIDs._1, userIDs._2, count)}).toSeq)
+    val rawEdges = validUserComments.flatMap(comment => postOwner.get(comment.postId)
+      .map(ownerId => (comment.userId, ownerId)))
+      .countByValue()
+
+    val edges = sparkContext.parallelize(rawEdges.map({ case (userIDs, count) => Edge(userIDs._1, userIDs._2, count) }).toSeq)
 
     val nodes: RDD[(VertexId, Int)] = userComments.map(user => (user._1, user._1))
     Graph(nodes, edges, -1)
   }
 
-  def dataframeFromGraph(graph: Graph[Int, Long], spark: SparkSession): DataFrame = 
+  def dataframeFromGraph(graph: Graph[Int, Long], spark: SparkSession): DataFrame =
     spark.createDataFrame(graph.triplets.map(trip => (trip.srcId, trip.attr, trip.dstId)))
       .toDF(SQLStrings.commentUserID, SQLStrings.numberOfComments, SQLStrings.postUserID)
 
@@ -225,7 +215,7 @@ object Task {
   def userIDsWithMostComments(dataframe: DataFrame, amount: Int = 10): Dataset[Row] = {
 
     println("=== Task 3.2 ===")
-    
+
     val mostComments = dataframe.groupBy(col(SQLStrings.commentUserID))
       .agg(sum(SQLStrings.numberOfComments).as(SQLStrings.numberOfCommentsSum))
       .sort(col(SQLStrings.numberOfCommentsSum).desc)
@@ -236,7 +226,7 @@ object Task {
   }
 
   def usersWithMostCommentsOnTheirPost(dataframe: DataFrame, users: RDD[User], spark: SparkSession, amount: Int = 10): Dataset[Row] = {
-    
+
     val usersDataFrame = spark.createDataFrame(users).as(SQLStrings.usersTable)
 
     val mostComments = dataframe.groupBy(col(SQLStrings.postUserID))

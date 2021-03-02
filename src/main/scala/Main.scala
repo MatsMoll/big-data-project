@@ -41,13 +41,13 @@ object SimpleApp {
     val comments = commentsRdd.map(row => Comment.fromRow(row))
 
     // 2.1
-    Task.RDDRowCounts(postsRdd, commentsRdd, useresRdd, badgesRdd)
+    Task.countRDDRows(postsRdd, commentsRdd, useresRdd, badgesRdd)
 
     // 2.2
-    Task.OldestAndNewestQuestions(posts, users)
+    Task.oldestAndNewestQuestions(posts, users)
 
     // 2.3
-    Task.UserIdOfMostQuestionsAndAnswersRespectively(posts)
+    Task.userIdOfMostQuestionsAndAnswersRespectively(posts)
     // 2.4
     Task.CountOfUsersWithLessThanThreeBadges(badges)
     // 2.5
