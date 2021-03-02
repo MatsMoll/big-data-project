@@ -85,10 +85,11 @@ object Task {
         case _ => newestPost
       }
     })
-    println(newestPost)
-    println(oldestPost)
-    println(newestPost.ownerUserId.map(userID => usersMap(userID)))
-    println(oldestPost.ownerUserId.map(userID => usersMap(userID)))
+    val newestPostUser = newestPost.ownerUserId.map(userID => usersMap(userID))
+    val oldestPostUser = oldestPost.ownerUserId.map(userID => usersMap(userID))
+
+    println(s"Newest Post Date: ${newestPost.creationDate}, User: $newestPostUser")
+    println(s"Oldest Post Date: ${oldestPost.creationDate}, User: $oldestPostUser")
   }
 
   // Task 2.3
