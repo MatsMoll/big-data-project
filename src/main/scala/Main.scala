@@ -58,7 +58,7 @@ object SimpleApp {
     Task.usersWithMostCommentsOnTheirPost(dataframe, users, spark)
     
     // 3.5
-    dataframe.write.csv("data/comments-posts.csv")
+    dataframe.write.mode("overwrite").csv(config.saveCommentPostUri)
 
     spark.stop()
   }

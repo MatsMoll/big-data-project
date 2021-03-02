@@ -1,7 +1,8 @@
 case class ProjectFileConfig(postsUri: String,
                              commentsUri: String,
                              usersUri: String,
-                             badgesUri: String)
+                             badgesUri: String, 
+                             saveCommentPostUri: String)
 
 import java.nio.file.{Paths, Files}
 
@@ -21,14 +22,16 @@ object ProjectFileConfig {
             s"$inputPath/posts.csv",
             s"$inputPath/comments.csv",
             s"$inputPath/users.csv",
-            s"$inputPath/badges.csv"
+            s"$inputPath/badges.csv",
+            s"$inputPath/commentPosts.csv"
         )
     } else {
         ProjectFileConfig(
             s"$inputPath/posts.csv.gz",
             s"$inputPath/comments.csv.gz",
             s"$inputPath/users.csv.gz",
-            s"$inputPath/badges.csv.gz"
+            s"$inputPath/badges.csv.gz",
+            s"$inputPath/commentPosts.csv"
         )
     }
   }
