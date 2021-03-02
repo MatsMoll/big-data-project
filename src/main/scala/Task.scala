@@ -218,7 +218,7 @@ object Task {
     val mostComments = dataframe.groupBy(col(SQLStrings.commentUserID))
       .agg(sum(SQLStrings.numberOfComments).as(SQLStrings.numberOfCommentsSum))
       .sort(col(SQLStrings.numberOfCommentsSum).desc)
-      .limit(10)
+      .limit(amount)
 
     mostComments.show()
     mostComments
