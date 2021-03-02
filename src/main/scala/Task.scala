@@ -54,7 +54,8 @@ object Task {
     val usersMap = users.map(user => (user.id, user.displayName))
       .collectAsMap()
 
-    val oldestPost = posts.reduce((oldestPost, post) => {
+    val oldestPost = posts.filter(p => p.postTypeId == 1).reduce((oldestPost,
+                                                              post) => {
       (post.creationDate, oldestPost.creationDate) match {
         case (Some(potenital), Some(oldestDate)) =>
           if (potenital.isBefore(oldestDate)) post else oldestPost
@@ -62,7 +63,8 @@ object Task {
         case _ => oldestPost
       }
     })
-    val newestPost = posts.reduce((newestPost, post) => {
+    val newestPost = posts.filter(p => p.postTypeId == 1).reduce((newestPost,
+                                                              post) => {
       (post.creationDate, newestPost.creationDate) match {
         case (Some(potenital), Some(newestDate)) =>
           if (newestDate.isBefore(potenital)) post else newestPost
@@ -81,10 +83,10 @@ object Task {
       .get
 
     println("=== Task 2.2 ===")
-    println(s"Newest Post Date: ${newestPost.creationDate.get}, " +
-      s"User: $newestPostUser")
-    println(s"Oldest Post Date: ${oldestPost.creationDate.get}, " +
-      s"User: $oldestPostUser")
+    println(s"Newest Question Post Date: ${newestPost.creationDate.get}, " +
+      s"by User: $newestPostUser")
+    println(s"Oldest Question Post Date: ${oldestPost.creationDate.get}, " +
+      s"by User: $oldestPostUser")
   }
 
   // Task 2.3
