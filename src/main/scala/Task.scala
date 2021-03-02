@@ -206,6 +206,7 @@ object Task {
     Graph(nodes, edges, -1)
   }
 
+  // Task 3.2
   def dataframeFromGraph(graph: Graph[Int, Long], spark: SparkSession): DataFrame =
     spark.createDataFrame(graph.triplets.map(trip => (trip.srcId, trip.attr, trip.dstId)))
       .toDF(SQLStrings.commentUserID, SQLStrings.numberOfComments, SQLStrings.postUserID)
