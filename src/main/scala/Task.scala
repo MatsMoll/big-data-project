@@ -43,7 +43,7 @@ object Task {
     println(s"Comments Rows: ${commentsRdd.count()}")
     println(s"Users Rows: ${usersRdd.count()}")
     println(s"Badges Rows: ${badgesRdd.count()}")
-    println("\n=== TASKS 1.1 through 1.4 START ===\n")
+    println("\n=== TASKS 1.1 through 1.4 END ===\n")
   }
 
   // Task 2.1
@@ -166,10 +166,12 @@ object Task {
       .map{case (_, _, right) => right}
       .sum
     //println(s"right: ${right.toString}")
+    val denominator = left * right;
+
 
     val res =
       (numeratorSum) /
-      (math.sqrt(math.abs(left)) * math.sqrt(math.abs(right)))
+      (math.sqrt(denominator))
     println(s"Task 2.5: r-coefficient: ${res.toString}\n")
 
     res
