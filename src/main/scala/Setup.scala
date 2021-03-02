@@ -28,5 +28,4 @@ object Setup {
       .textFile(config.usersUri)
       .filter(x => !x.startsWith("\"Id\"")).map(x => x.split("\t"))
   }
-
 }

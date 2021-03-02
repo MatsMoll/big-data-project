@@ -222,10 +222,10 @@ object Task {
     spark.createDataFrame(graph.triplets.map(trip => (trip.srcId, trip.attr, trip.dstId)))
       .toDF(SQLStrings.commentUserID, SQLStrings.numberOfComments, SQLStrings.postUserID)
 
-  // Task 3.2
+  // Task 3.3
   def userIDsWithMostComments(dataframe: DataFrame, amount: Int = 10): Dataset[Row] = {
 
-    println("=== Task 3.2 ===")
+    println("=== Task 3.3 ===")
 
     val mostComments = dataframe.groupBy(col(SQLStrings.commentUserID))
       .agg(sum(SQLStrings.numberOfComments).as(SQLStrings.numberOfCommentsSum))
@@ -236,6 +236,7 @@ object Task {
     mostComments
   }
 
+  // Task 3.4
   def usersWithMostCommentsOnTheirPost(dataframe: DataFrame, users: RDD[User], spark: SparkSession, amount: Int = 10): Dataset[Row] = {
 
     val usersDataFrame = spark.createDataFrame(users).as(SQLStrings.usersTable)
@@ -246,6 +247,7 @@ object Task {
       .sort(col(SQLStrings.numberOfCommentsSum).desc)
       .limit(amount)
 
+    println("=== Task 3.4 ===")
     mostComments.show()
     mostComments
   }
