@@ -18,7 +18,7 @@ object SimpleApp {
       .master("local[1]")
       .getOrCreate()
     val sc = spark.sparkContext
-    sc.setLogLevel("WARN")
+    sc.setLogLevel("OFF")
 
     val config = ProjectFileConfig(
       "data/posts.csv",

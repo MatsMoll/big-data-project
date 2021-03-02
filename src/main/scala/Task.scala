@@ -88,8 +88,10 @@ object Task {
     val newestPostUser = newestPost.ownerUserId.map(userID => usersMap(userID))
     val oldestPostUser = oldestPost.ownerUserId.map(userID => usersMap(userID))
 
-    println(s"Newest Post Date: ${newestPost.creationDate}, User: $newestPostUser")
-    println(s"Oldest Post Date: ${oldestPost.creationDate}, User: $oldestPostUser")
+    println(s"Newest Post Date: ${newestPost.creationDate.get}, " +
+      s"User: $newestPostUser")
+    println(s"Oldest Post Date: ${oldestPost.creationDate.get}, " +
+      s"User: $oldestPostUser")
   }
 
   // Task 2.3
@@ -126,7 +128,7 @@ object Task {
       .count()
 
     println(s"=== Task 2.4: Users with less than three " +
-      s"badges: $badgesLessThan3\n ===")
+      s"badges: $badgesLessThan3 ===\n ")
 
     badgesLessThan3
   }
@@ -168,7 +170,7 @@ object Task {
     val res =
       (numeratorSum) /
         (math.sqrt(denominator))
-    println(s"=== Task 2.5: r-coefficient: ${res.toString}\n ===")
+    println(s"=== Task 2.5: r-coefficient: ${res.toString} ===\n")
 
     res
   }
@@ -184,7 +186,7 @@ object Task {
       })
       .reduce({ case (sum, value) => sum - value * log10(value) / log10(2) })
 
-    println(s"=== Task 2.6: users comment entropy: ${usersEntropy}\n ===")
+    println(s"=== Task 2.6: users comment entropy: ${usersEntropy} ===\n")
 
     usersEntropy
   }
