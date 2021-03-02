@@ -9,11 +9,8 @@ import org.apache.spark.sql.functions._
 import org.apache.parquet.filter2.predicate.Operators.Column
 
 object Computations {
-  def averageCharLengthBase64(base64rdd: RDD[String]): Double = {
-    val strings = base64rdd.map(baseString => {
-      val data = Base64.getDecoder().decode(baseString)
-      new String(data)
-    })
+
+  def averageCharLength(strings: RDD[String]): Double = {
     val charLength = strings.map(string => {
       (string.toCharArray().length, 1)
     })
@@ -21,17 +18,6 @@ object Computations {
 
     charLength._1.doubleValue() / charLength._2.doubleValue()
   }
-
-  def averageCharLengthString(strings: RDD[String]): Double = {
-    val charLength = strings.map(string => {
-      (string.toCharArray().length, 1)
-    })
-      .reduce((x, y) => (x._1 + y._1, x._2 + y._2))
-
-    charLength._1.doubleValue() / charLength._2.doubleValue()
-  }
-
-
 }
 
 object Task {
@@ -52,17 +38,15 @@ object Task {
   }
 
   // Task 2.1
-  def averageCharacterLengthInTexts(postsRdd: RDD[Array[String]],
-                                    commentsRdd: RDD[Array[String]],
-                                    useresRdd: RDD[Array[String]]): Unit = {
-    val averagePostCharLength = Computations.averageCharLengthBase64(postsRdd.map(x => x(5)))
-    val averageCommentCharLength = Computations.averageCharLengthBase64(commentsRdd.map(x => x(2)))
-    val averageQuestionCharLength = Computations.averageCharLengthString(postsRdd.map(x => x(8)))
+  def averageCharacterLengthInTexts(posts: RDD[Post], comments: RDD[Comment]): Unit = {
+    val averagePostCharLength = Computations.averageCharLength(posts.map(x => x.body))
+    val averageCommentCharLength = Computations.averageCharLength(comments.map(x => x.text))
+    val averageQuestionCharLength = Computations.averageCharLength(posts.map(x => x.title))
 
-
-    println("Post", averagePostCharLength)
-    println("Question", averageQuestionCharLength)
-    println("Comment", averageCommentCharLength)
+    println("=== Task 2.1 ===")
+    println(s"Avg Post length: $averagePostCharLength")
+    println(s"Avg Question length: $averageQuestionCharLength")
+    println(s"Avg Comment length: $averageCommentCharLength")
   }
 
   // Task 2.2
@@ -96,6 +80,7 @@ object Task {
       .map(userID => usersMap(userID))
       .get
 
+    println("=== Task 2.2 ===")
     println(s"Newest Post Date: ${newestPost.creationDate.get}, " +
       s"User: $newestPostUser")
     println(s"Oldest Post Date: ${oldestPost.creationDate.get}, " +

@@ -8,11 +8,10 @@ import java.nio.file.{Paths, Files}
 
 object ProjectFileConfig {
   def parseArgs(args: Array[String]): ProjectFileConfig = {
-    println(args.toList)
     if (args.length != 2) {
         throw new Exception("Missing input_path argument")
     }
-    val inputPathIndex = args.indexWhere(arg => arg == "--input_file")
+    val inputPathIndex = args.indexWhere(arg => arg == "--input_path")
     if (inputPathIndex + 1 >= args.length) {
         throw new Exception("Missing argument after input_path")
     }

@@ -29,8 +29,11 @@ object SimpleApp {
     val users = useresRdd.map(row => User.fromRow(row))
     val comments = commentsRdd.map(row => Comment.fromRow(row))
 
-    // 2.1
+    // 1.5
     Task.countRDDRows(postsRdd, commentsRdd, useresRdd, badgesRdd)
+
+    // 2.1
+    Task.averageCharacterLengthInTexts(posts, comments)
 
     // 2.2
     Task.oldestAndNewestQuestions(posts, users)
