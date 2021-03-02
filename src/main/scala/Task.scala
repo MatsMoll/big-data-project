@@ -67,7 +67,8 @@ object Task {
 
   // Task 2.2
   def oldestAndNewestQuestions(posts: RDD[Post], users: RDD[User]): Unit = {
-    val usersMap = users.map(user => (user.id, user)).collect().toMap
+    val usersMap = users.map(user => (user.id, user.displayName))
+      .collectAsMap()
 
     val oldestPost = posts.reduce((oldestPost, post) => {
       (post.creationDate, oldestPost.creationDate) match {
@@ -85,8 +86,15 @@ object Task {
         case _ => newestPost
       }
     })
-    val newestPostUser = newestPost.ownerUserId.map(userID => usersMap(userID))
-    val oldestPostUser = oldestPost.ownerUserId.map(userID => usersMap(userID))
+    val newestPostUser = newestPost
+      .ownerUserId
+      .map(userID => usersMap(userID))
+      .get
+
+    val oldestPostUser = oldestPost
+      .ownerUserId
+      .map(userID => usersMap(userID))
+      .get
 
     println(s"Newest Post Date: ${newestPost.creationDate.get}, " +
       s"User: $newestPostUser")

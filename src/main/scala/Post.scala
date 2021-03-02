@@ -26,7 +26,7 @@ object Post {
       if (row(2) == "NULL") None else Some(LocalDateTime.parse(row(2), MyUtils.dateFormatter)),
       row(3).toInt,
       row(4).toInt,
-      new String(Base64.getDecoder().decode(row(5))),
+      new String(Base64.getDecoder.decode(row(5))),
       if (row(6) == "NULL") None else Some(row(6).toInt),
       LocalDateTime.parse(row(7), MyUtils.dateFormatter),
       row(8),
