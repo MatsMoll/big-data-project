@@ -106,6 +106,22 @@ object SimpleApp {
       .reduce({case (sum, value) => sum - value * log10(value) / log10(2)})
 
     println(usersEntropy)
+
+
+    // 3.1
+
+    val postOwner = posts.flatMap(post => post.ownerUserId.map(ownerId => (post.id, ownerId))).collect().toMap
+    
+    val rawEdges = comments.flatMap(comment => postOwner.get(comment.postId)
+        .map(ownerId =>  (comment.userId, ownerId) ) )
+        .countByValue()
+
+    val edges = spark.sparkContext.parallelize(rawEdges.map({case (userIDs, count) => Edge(userIDs._1, userIDs._2, count)}).toSeq)
+
+    val nodes: RDD[(VertexId, Int)] = userComments.map(user => (user._1, user._1))
+    val postGraph = Graph(nodes, edges)
+
+    println(postGraph)
     
     // println(postsRdd.count())
     // println(commentsRdd.count())
