@@ -39,12 +39,15 @@ object Task {
 
   // Task 2.1
   def averageCharacterLengthInTexts(posts: RDD[Post], comments: RDD[Comment]): Unit = {
-    val averagePostCharLength = Computations.averageCharLength(posts.map(x => x.body))
+    val questions = posts.filter(post => post.postTypeId == 1)
+    val answers = posts.filter(post => post.postTypeId == 2)
+
+    val averageAnswerCharLength = Computations.averageCharLength(answers.map(x => x.body))
     val averageCommentCharLength = Computations.averageCharLength(comments.map(x => x.text))
-    val averageQuestionCharLength = Computations.averageCharLength(posts.map(x => x.title))
+    val averageQuestionCharLength = Computations.averageCharLength(questions.map(x => x.title))
 
     println("=== Task 2.1 ===")
-    println(s"Avg Post length: $averagePostCharLength")
+    println(s"Avg Answer length: $averageAnswerCharLength")
     println(s"Avg Question length: $averageQuestionCharLength")
     println(s"Avg Comment length: $averageCommentCharLength")
   }
