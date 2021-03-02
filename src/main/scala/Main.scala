@@ -37,6 +37,7 @@ object SimpleApp {
     val badges = badgesRdd.map(row => Badge.fromRow(row))
     val posts = postsRdd.map(row => Post.fromRow(row))
     val users = useresRdd.map(row => User.fromRow(row))
+    val comments = commentsRdd.map(row => Comment.fromRow(row))
 
     // 2.1
     Task.RDDRowCounts(postsRdd, commentsRdd, useresRdd, badgesRdd)
@@ -51,6 +52,16 @@ object SimpleApp {
     // 2.5
     Task.UpvoteDownvotePearsonCorrelationCoefficient(users)
 
+    // 2.6
+    Task.userEntropy(comments)
+
+    // 3.1
+    Task.userCommentGraph(comments, posts, sc).vertices.take(10).foreach(println)
+    
+    // println(postsRdd.count())
+    // println(commentsRdd.count())
+    // println(useresRdd.count())
+    // println(badgesRdd.count())
     spark.stop()
   }
 }

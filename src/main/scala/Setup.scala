@@ -16,8 +16,7 @@ object Setup {
       .filter(x => !x.startsWith("\"Id\"")).map(x => x.split("\t"))
   }
 
-  def LoadCommentsRDD(spark: SparkSession, config: ProjectFileConfig)
-  : RDD[Array[String]] = {
+  def LoadCommentsRDD(spark: SparkSession, config: ProjectFileConfig): RDD[Array[String]] = {
     spark.sparkContext
       .textFile(config.commentsUri)
       .filter(x => !x.startsWith("\"PostId\"")).map(x => x.split("\t"))

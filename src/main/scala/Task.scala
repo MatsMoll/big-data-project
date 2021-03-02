@@ -2,6 +2,8 @@ import java.util.Base64
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.graphx._
+import org.apache.spark.SparkContext
 
 object Computations {
   def averageCharLengthBase64(base64rdd: RDD[String]): Double = {
@@ -177,4 +179,33 @@ object Task {
     res
   }
 
+  // Task 2.6
+  def userEntropy(comments: RDD[Comment]): Double = {
+    val numberOfComments = comments.count()
+    val userComments = comments.groupBy(comment => comment.userId)
+
+    val usersEntropy = userComments
+      .map({case (_, postIDs: Iterable[Comment]) =>
+        postIDs.count(_ => true).toDouble / numberOfComments.toDouble
+      })
+      .reduce({case (sum, value) => sum - value * log10(value) / log10(2)})
+
+    println(s"Task 2.6: users comment entropy: ${usersEntropy}\n")
+
+    usersEntropy
+  }
+
+
+  def userCommentGraph(comments: RDD[Comment], posts: RDD[Post], sparkContext: SparkContext): Graph[Int, Long] = {
+    val postOwner = posts.flatMap(post => post.ownerUserId.map(ownerId => (post.id, ownerId))).collect().toMap
+    
+    val rawEdges = comments.flatMap(comment => postOwner.get(comment.postId)
+        .map(ownerId =>  (comment.userId, ownerId) ) )
+        .countByValue()
+
+    val edges = sparkContext.parallelize(rawEdges.map({case (userIDs, count) => Edge(userIDs._1, userIDs._2, count)}).toSeq)
+
+    val nodes: RDD[(VertexId, Int)] = userComments.map(user => (user._1, user._1))
+    Graph(nodes, edges, -1)
+  }
 }
