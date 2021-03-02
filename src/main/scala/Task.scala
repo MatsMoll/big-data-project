@@ -4,6 +4,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.graphx._
 import org.apache.spark.SparkContext
+import scala.math.log10
 
 object Computations {
   def averageCharLengthBase64(base64rdd: RDD[String]): Double = {
@@ -182,7 +183,7 @@ object Task {
   // Task 2.6
   def userEntropy(comments: RDD[Comment]): Double = {
     val numberOfComments = comments.count()
-    val userComments = comments.groupBy(comment => comment.userId)
+    val userComments = comments.groupBy(comment => comment.userId).cache()
 
     val usersEntropy = userComments
       .map({case (_, postIDs: Iterable[Comment]) =>
@@ -198,6 +199,7 @@ object Task {
 
   def userCommentGraph(comments: RDD[Comment], posts: RDD[Post], sparkContext: SparkContext): Graph[Int, Long] = {
     val postOwner = posts.flatMap(post => post.ownerUserId.map(ownerId => (post.id, ownerId))).collect().toMap
+    val userComments = comments.groupBy(comment => comment.userId).cache()
     
     val rawEdges = comments.flatMap(comment => postOwner.get(comment.postId)
         .map(ownerId =>  (comment.userId, ownerId) ) )
