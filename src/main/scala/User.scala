@@ -2,7 +2,7 @@ import java.time.LocalDateTime
 
 case class User(
                  id: Int,
-                 reprutation: String,
+                 reputation: String,
                  createdAt: Option[LocalDateTime],
                  displayName: String,
                  lastAccessDate: Option[LocalDateTime],
