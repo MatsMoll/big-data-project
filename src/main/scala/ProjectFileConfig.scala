@@ -8,10 +8,21 @@ import java.nio.file.{Paths, Files}
 
 object ProjectFileConfig {
   def parseArgs(args: Array[String]): ProjectFileConfig = {
-    println(args.toList)
     if (args.length != 2) {
-        throw new Exception("Missing input_path argument")
-    }
+      if (Files.exists(Paths.get(s"data/posts.csv"))) {
+        return ProjectFileConfig(
+          s"data/posts.csv",
+          s"data/comments.csv",
+          s"data/users.csv",
+          s"data/badges.csv",
+          s"data/commentPosts.csv"
+        )
+      }
+        else {
+          throw new Exception("Missing input_path argument")
+        }
+      }
+
     val inputPathIndex = args.indexWhere(arg => arg == "--input_file")
     if (inputPathIndex + 1 >= args.length) {
         throw new Exception("Missing argument after input_path")
