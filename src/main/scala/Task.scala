@@ -38,15 +38,21 @@ object Task {
   }
 
   // Task 2.1
-  def averageCharacterLengthInTexts(posts: RDD[Post], comments: RDD[Comment]): Unit = {
-    val averagePostCharLength = Computations.averageCharLength(posts.map(x => x.body))
-    val averageCommentCharLength = Computations.averageCharLength(comments.map(x => x.text))
-    val averageQuestionCharLength = Computations.averageCharLength(posts.map(x => x.title))
+  def averageCharacterLengthInTexts(posts: RDD[Post],
+                                    comments: RDD[Comment]): Unit = {
+    val averagePostCharLength =
+      Computations.averageCharLength(posts.map(x => x.body))
+
+    val averageCommentCharLength =
+      Computations.averageCharLength(comments.map(x => x.text))
+
+    val averageQuestionCharLength =
+      Computations.averageCharLength(posts.map(x => x.title))
 
     println("=== Task 2.1 ===")
     println(s"Avg Post length: $averagePostCharLength")
     println(s"Avg Question length: $averageQuestionCharLength")
-    println(s"Avg Comment length: $averageCommentCharLength")
+    println(s"Avg Comment length: $averageCommentCharLength\n")
   }
 
   // Task 2.2
@@ -55,19 +61,19 @@ object Task {
       .collectAsMap()
 
     val oldestPost = posts.filter(p => p.postTypeId == 1).reduce((oldestPost,
-                                                              post) => {
+                                                                  post) => {
       (post.creationDate, oldestPost.creationDate) match {
-        case (Some(potenital), Some(oldestDate)) =>
-          if (potenital.isBefore(oldestDate)) post else oldestPost
+        case (Some(potential), Some(oldestDate)) =>
+          if (potential.isBefore(oldestDate)) post else oldestPost
         case (Some(_), None) => post
         case _ => oldestPost
       }
     })
     val newestPost = posts.filter(p => p.postTypeId == 1).reduce((newestPost,
-                                                              post) => {
+                                                                  post) => {
       (post.creationDate, newestPost.creationDate) match {
-        case (Some(potenital), Some(newestDate)) =>
-          if (newestDate.isBefore(potenital)) post else newestPost
+        case (Some(potential), Some(newestDate)) =>
+          if (newestDate.isBefore(potential)) post else newestPost
         case (Some(_), None) => post
         case _ => newestPost
       }
@@ -75,30 +81,40 @@ object Task {
     val newestPostUser = newestPost
       .ownerUserId
       .map(userID => usersMap(userID))
-      .get
+      .getOrElse("No User Found")
 
     val oldestPostUser = oldestPost
       .ownerUserId
       .map(userID => usersMap(userID))
-      .get
+      .getOrElse("No User Found")
 
     println("=== Task 2.2 ===")
-    println(s"Newest Question Post Date: ${newestPost.creationDate.get}, " +
-      s"by User: $newestPostUser")
-    println(s"Oldest Question Post Date: ${oldestPost.creationDate.get}, " +
-      s"by User: $oldestPostUser")
+    println(
+      s"""Newest Question Post Date: ${
+        newestPost.creationDate.getOrElse("No " +
+          "Date Found")
+      }, by
+         |User: $newestPostUser""".stripMargin)
+    println(
+      s"""Oldest Question Post Date: ${
+        oldestPost.creationDate.getOrElse("No " +
+          "Date Found")
+      } by
+         |User: $oldestPostUser""".stripMargin)
+    println()
+
   }
 
   // Task 2.3
   def userIdOfMostQuestionsAndAnswersRespectively(posts: RDD[Post]): Unit = {
-    println("=== TASK 2.3 ===")
+    println("=== Task 2.3 ===")
     val mostQuestions = posts
       .filter(p => p.postTypeId == 1)
       .filter(p => p.ownerUserId.isDefined)
       .filter(p => p.ownerUserId.get != -1)
       .map(p => (p.ownerUserId.get, 1))
       .reduceByKey(_ + _)
-      .sortBy(_._2, false)
+      .sortBy(_._2, ascending = false)
       .take(1)
       .map { case (id, count) => println(s"(UserId:$id, count: $count)") }
     println("===MOST QUESTION ONLY==\n")
@@ -109,7 +125,7 @@ object Task {
       .filter(p => p.ownerUserId.get != -1)
       .map(p => (p.ownerUserId.get, 1))
       .reduceByKey(_ + _)
-      .sortBy(_._2, false)
+      .sortBy(_._2, ascending = false)
       .take(1)
       .map { case (id, count) => println(s"(UserId:$id, count: $count)") }
     println("===MOST ANSWERS ONLY==\n")
@@ -133,8 +149,6 @@ object Task {
     val upvotesMean = users.map(u => u.upVotes).mean()
     val downvotesMean = users.map(u => u.downVotes).mean()
 
-    //println(s"upvotemean: $upvotesMean, downvotemean: $downvotesMean")
-
     val pearsonsTable = users.map(u => {
       val up = (u.upVotes - upvotesMean)
       val left = up * up
@@ -148,19 +162,16 @@ object Task {
     val numeratorSum = pearsonsTable
       .map { case (numerator, _, _) => numerator }
       .sum
-    //println(s"numSum: ${numeratorSum.toString}")
 
     val left = pearsonsTable
       .map { case (_, left, _) => left }
       .sum
-    //println(s"left: ${left.toString}")
 
     val right = pearsonsTable
       .map { case (_, _, right) => right }
       .sum
-    //println(s"right: ${right.toString}")
-    val denominator = left * right;
 
+    val denominator = left * right;
 
     val res =
       (numeratorSum) /
@@ -188,29 +199,46 @@ object Task {
 
 
   // Task 3.1
-  def userCommentGraph(comments: RDD[Comment], posts: RDD[Post], sparkContext: SparkContext): Graph[Int, Long] = {
-    val postOwner = posts.flatMap(post => post.ownerUserId.map(ownerId => (post.id, ownerId))).collect().toMap
+  def userCommentGraph(comments: RDD[Comment],
+                       posts: RDD[Post],
+                       sparkContext: SparkContext): Graph[Int, Long] = {
+    val postOwner = posts.flatMap(post =>
+      post.ownerUserId
+        .map(ownerId => (post.id, ownerId))).collect().toMap
 
     // Filtering on userId > 1 as some posts has
     val validUserComments = comments.filter(comment => comment.userId >= 1)
-    val userComments = validUserComments.groupBy(comment => comment.userId).cache()
+    val userComments =
+      validUserComments.groupBy(comment => comment.userId).cache()
 
-    val rawEdges = validUserComments.flatMap(comment => postOwner.get(comment.postId)
-      .map(ownerId => (comment.userId, ownerId)))
+    val rawEdges = validUserComments
+      .flatMap(comment => postOwner.get(comment.postId)
+        .map(ownerId => (comment.userId, ownerId)))
       .countByValue()
 
-    val edges = sparkContext.parallelize(rawEdges.map({ case (userIDs, count) => Edge(userIDs._1, userIDs._2, count) }).toSeq)
+    val edges = sparkContext
+      .parallelize(rawEdges
+        .map({ case (userIDs, count) => Edge(userIDs._1, userIDs._2, count) })
+        .toSeq
+      )
 
-    val nodes: RDD[(VertexId, Int)] = userComments.map(user => (user._1, user._1))
+    val nodes: RDD[(VertexId, Int)] =
+      userComments.map(user => (user._1, user._1))
+
     Graph(nodes, edges, -1)
   }
 
-  def dataframeFromGraph(graph: Graph[Int, Long], spark: SparkSession): DataFrame =
-    spark.createDataFrame(graph.triplets.map(trip => (trip.srcId, trip.attr, trip.dstId)))
-      .toDF(SQLStrings.commentUserID, SQLStrings.numberOfComments, SQLStrings.postUserID)
+  def dataframeFromGraph(graph: Graph[Int, Long],
+                         spark: SparkSession): DataFrame =
+    spark.createDataFrame(graph.triplets
+      .map(trip => (trip.srcId, trip.attr, trip.dstId)))
+      .toDF(SQLStrings.commentUserID,
+        SQLStrings.numberOfComments,
+        SQLStrings.postUserID)
 
   // Task 3.3
-  def userIDsWithMostComments(dataframe: DataFrame, amount: Int = 10): Dataset[Row] = {
+  def userIDsWithMostComments(dataframe: DataFrame,
+                              amount: Int = 10): Dataset[Row] = {
 
     println("=== Task 3.3 ===")
 
@@ -224,7 +252,10 @@ object Task {
   }
 
   // Task 3.4
-  def usersWithMostCommentsOnTheirPost(dataframe: DataFrame, users: RDD[User], spark: SparkSession, amount: Int = 10): Dataset[Row] = {
+  def usersWithMostCommentsOnTheirPost(dataframe: DataFrame,
+                                       users: RDD[User],
+                                       spark: SparkSession,
+                                       amount: Int = 10): Dataset[Row] = {
 
     val usersDataFrame = spark.createDataFrame(users).as(SQLStrings.usersTable)
 
