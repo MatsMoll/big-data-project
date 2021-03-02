@@ -81,7 +81,7 @@ object Task {
     val newestPost = posts.reduce((newestPost, post) => {
       (post.creationDate, newestPost.creationDate) match {
         case (Some(potenital), Some(newestDate)) =>
-          if (newestDate.isBefore(potenital)) newestPost else post
+          if (newestDate.isBefore(potenital)) post else newestPost
         case (Some(_), None) => post
         case _ => newestPost
       }
