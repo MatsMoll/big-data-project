@@ -234,4 +234,18 @@ object Task {
     mostComments.show()
     mostComments
   }
+
+  def usersWithMostCommentsOnTheirPost(dataframe: DataFrame, users: RDD[User], spark: SparkSession, amount: Int = 10): Dataset[Row] = {
+    
+    val usersDataFrame = spark.createDataFrame(users).as(SQLStrings.usersTable)
+
+    val mostComments = dataframe.groupBy(col(SQLStrings.postUserID))
+      .agg(sum(SQLStrings.numberOfComments).as(SQLStrings.numberOfCommentsSum))
+      .join(usersDataFrame, dataframe(SQLStrings.postUserID) === usersDataFrame(SQLStrings.userID))
+      .sort(col(SQLStrings.numberOfCommentsSum).desc)
+      .limit(amount)
+
+    mostComments.show()
+    mostComments
+  }
 }

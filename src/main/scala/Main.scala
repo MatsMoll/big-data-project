@@ -44,7 +44,7 @@ object SimpleApp {
     Task.RDDRowCounts(postsRdd, commentsRdd, useresRdd, badgesRdd)
 
     // 2.2
-    //Task.OldestAndNewestQuestions(posts, users)
+    Task.OldestAndNewestQuestions(posts, users)
 
     // 2.3
     Task.UserIdOfMostQuestionsAndAnswersRespectively(posts)
@@ -60,14 +60,12 @@ object SimpleApp {
     val graph = Task.userCommentGraph(comments, posts, sc)
 
     // 3.2
-    Task.usersWithMostComments(graph, spark)
-      
-      
+    val dataframe = Task.dataframeFromGraph(graph, spark)
+    Task.userIDsWithMostComments(dataframe)
     
-    // println(postsRdd.count())
-    // println(commentsRdd.count())
-    // println(useresRdd.count())
-    // println(badgesRdd.count())
+    // 3.3
+    Task.usersWithMostCommentsOnTheirPost(dataframe, users, spark)
+    
     spark.stop()
   }
 }
